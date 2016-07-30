@@ -3,7 +3,7 @@
 // Refer to the license.txt file included.
 
 #pragma once
-
+#include <atomic>
 #include <tuple>
 #include <utility>
 
@@ -11,8 +11,6 @@
 #include "common/math_util.h"
 
 #include "core/hle/service/hid/hid.h"
-#include <atomic>
-
 /**
  * Abstraction class used to provide an interface between emulation code and the frontend
  * (e.g. SDL, QGLWidget, GLFW, etc...).
