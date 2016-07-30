@@ -140,7 +140,7 @@ public:
      * @return std::tuple of (x, y, pressed) where `x` and `y` are the touch coordinates and
      *         `pressed` is true if the touch screen is currently being pressed
      */
-    std::tuple< u16,u16,bool> GetTouchState() const {
+    std::tuple< u16, u16, bool> GetTouchState() const {
         return std::make_tuple(touch_x.load(), touch_y.load(), touch_pressed.load());
     }
 
@@ -283,10 +283,10 @@ private:
     WindowConfig config;         ///< Internal configuration (changes pending for being applied in ProcessConfigurationChanges)
     WindowConfig active_config;  ///< Internal active configuration
 
-  std::atomic<bool> touch_pressed;          ///< True if touchpad area is currently pressed, otherwise false
+    std::atomic<bool> touch_pressed;          ///< True if touchpad area is currently pressed, otherwise false
 
-  std::atomic <u16> touch_x;    ///< Touchpad X-position in native 3DS pixel coordinates (0-320)
-  std::atomic <u16> touch_y;    ///< Touchpad Y-position in native 3DS pixel coordinates (0-240)
+    std::atomic <u16> touch_x;    ///< Touchpad X-position in native 3DS pixel coordinates (0-320)
+    std::atomic <u16> touch_y;    ///< Touchpad Y-position in native 3DS pixel coordinates (0-240)
 
     std::atomic <s16> circle_pad_x; ///< Circle pad X-position in native 3DS pixel coordinates (-156 - 156)
     std::atomic <s16> circle_pad_y; ///< Circle pad Y-position in native 3DS pixel coordinates (-156 - 156)
