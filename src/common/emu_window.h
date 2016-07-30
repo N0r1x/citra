@@ -11,6 +11,7 @@
 #include "common/math_util.h"
 
 #include "core/hle/service/hid/hid.h"
+#include <atomic>
 
 /**
  * Abstraction class used to provide an interface between emulation code and the frontend
@@ -115,32 +116,32 @@ public:
      * Gets the current pad state (which buttons are pressed).
      * @note This should be called by the core emu thread to get a state set by the window thread.
      * @note This doesn't include analog input like circle pad direction
-     * @todo Fix this function to be thread-safe.
+     * @todo Confirm the update from PadState to atomic <PadState> doesn't cause any problems
      * @return PadState object indicating the current pad state
      */
     Service::HID::PadState GetPadState() const {
-        return pad_state;
+        return pad_state.load();
     }
 
     /**
      * Gets the current circle pad state.
      * @note This should be called by the core emu thread to get a state set by the window thread.
-     * @todo Fix this function to be thread-safe.
+     * @todo Confirm the update from s16 to atomic <s16> doesn't cause any problems
      * @return std::tuple of (x, y), where `x` and `y` are the circle pad coordinates
      */
     std::tuple<s16, s16> GetCirclePadState() const {
-        return std::make_tuple(circle_pad_x, circle_pad_y);
+        return std::make_tuple(circle_pad_x.load(), circle_pad_y.load());
     }
 
     /**
      * Gets the current touch screen state (touch X/Y coordinates and whether or not it is pressed).
      * @note This should be called by the core emu thread to get a state set by the window thread.
-     * @todo Fix this function to be thread-safe.
+     * @todo Confirm the update from u16/bool to atomic <u16/bool> doesn't cause any problems
      * @return std::tuple of (x, y, pressed) where `x` and `y` are the touch coordinates and
      *         `pressed` is true if the touch screen is currently being pressed
      */
-    std::tuple<u16, u16, bool> GetTouchState() const {
-        return std::make_tuple(touch_x, touch_y, touch_pressed);
+    std::tuple< u16,u16,bool> GetTouchState() const {
+        return std::make_tuple(touch_x.load(), touch_y.load(), touch_pressed.load());
     }
 
     /**
@@ -220,12 +221,14 @@ protected:
         // TODO: Find a better place to set this.
         config.min_client_area_size = std::make_pair(400u, 480u);
         active_config = config;
-        pad_state.hex = 0;
-        touch_x = 0;
-        touch_y = 0;
-        circle_pad_x = 0;
-        circle_pad_y = 0;
-        touch_pressed = false;
+        Service::HID::PadState temp;
+        temp.hex = 0;
+        pad_state.store(temp);
+        touch_x ={0};
+        touch_y ={0};
+        circle_pad_x = {0};
+        circle_pad_y = {0};
+        touch_pressed = {false};
     }
     virtual ~EmuWindow() {}
 
@@ -280,18 +283,18 @@ private:
     WindowConfig config;         ///< Internal configuration (changes pending for being applied in ProcessConfigurationChanges)
     WindowConfig active_config;  ///< Internal active configuration
 
-    bool touch_pressed;          ///< True if touchpad area is currently pressed, otherwise false
+  std::atomic<bool> touch_pressed;          ///< True if touchpad area is currently pressed, otherwise false
 
-    u16 touch_x;    ///< Touchpad X-position in native 3DS pixel coordinates (0-320)
-    u16 touch_y;    ///< Touchpad Y-position in native 3DS pixel coordinates (0-240)
+  std::atomic <u16> touch_x;    ///< Touchpad X-position in native 3DS pixel coordinates (0-320)
+  std::atomic <u16> touch_y;    ///< Touchpad Y-position in native 3DS pixel coordinates (0-240)
 
-    s16 circle_pad_x; ///< Circle pad X-position in native 3DS pixel coordinates (-156 - 156)
-    s16 circle_pad_y; ///< Circle pad Y-position in native 3DS pixel coordinates (-156 - 156)
+    std::atomic <s16> circle_pad_x; ///< Circle pad X-position in native 3DS pixel coordinates (-156 - 156)
+    std::atomic <s16> circle_pad_y; ///< Circle pad Y-position in native 3DS pixel coordinates (-156 - 156)
 
    /**
     * Clip the provided coordinates to be inside the touchscreen area.
     */
     std::tuple<unsigned,unsigned> ClipToTouchScreen(unsigned new_x, unsigned new_y);
 
-    Service::HID::PadState pad_state;
+    std::atomic <Service::HID::PadState> pad_state;
 };

@@ -12,11 +12,15 @@
 #include "video_core/video_core.h"
 
 void EmuWindow::ButtonPressed(Service::HID::PadState pad) {
-    pad_state.hex |= pad.hex;
+        Service::HID::PadState temp=pad_state.load();
+        temp.hex |= pad.hex;
+        pad_state.store(temp);
 }
 
 void EmuWindow::ButtonReleased(Service::HID::PadState pad) {
-    pad_state.hex &= ~pad.hex;
+        Service::HID::PadState temp=pad_state.load();
+        temp.hex &= ~pad.hex;
+        pad_state.store(temp);
 }
 
 void EmuWindow::CirclePadUpdated(float x, float y) {
@@ -70,14 +74,18 @@ void EmuWindow::TouchPressed(unsigned framebuffer_x, unsigned framebuffer_y) {
         (framebuffer_layout.bottom_screen.bottom - framebuffer_layout.bottom_screen.top);
 
     touch_pressed = true;
-    pad_state.touch.Assign(1);
+    Service::HID::PadState temp=pad_state.load();
+    temp.touch.Assign(1);
+    pad_state.store(temp);
 }
 
 void EmuWindow::TouchReleased() {
     touch_pressed = false;
     touch_x = 0;
     touch_y = 0;
-    pad_state.touch.Assign(0);
+    Service::HID::PadState temp=pad_state.load();
+    temp.touch.Assign(0);
+    pad_state.store(temp);
 }
 
 void EmuWindow::TouchMoved(unsigned framebuffer_x, unsigned framebuffer_y) {
