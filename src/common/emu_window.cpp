@@ -12,15 +12,15 @@
 #include "video_core/video_core.h"
 
 void EmuWindow::ButtonPressed(Service::HID::PadState pad) {
-        Service::HID::PadState temp=pad_state.load();
-        temp.hex |= pad.hex;
-        pad_state.store(temp);
+    Service::HID::PadState temp=pad_state.load();
+    temp.hex |= pad.hex;
+    pad_state.store(temp);
 }
 
 void EmuWindow::ButtonReleased(Service::HID::PadState pad) {
-        Service::HID::PadState temp=pad_state.load();
-        temp.hex &= ~pad.hex;
-        pad_state.store(temp);
+    Service::HID::PadState temp=pad_state.load();
+    temp.hex &= ~pad.hex;
+    pad_state.store(temp);
 }
 
 void EmuWindow::CirclePadUpdated(float x, float y) {
